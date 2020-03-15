@@ -1,3 +1,4 @@
+from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.keys import Keys
 import time,re,csv
@@ -99,9 +100,6 @@ def send_email(send_list):
         server.sendmail(from_addr, to_addr, msg.as_string())
         # 关闭服务器
         server.quit()
-    # else:
-    #     break
-    exit()
 
 if __name__ == '__main__':
     from_addr = '1132680329@qq.com'
@@ -117,8 +115,13 @@ if __name__ == '__main__':
     new_list = []
     old_list = []
     send_list = []
-    
-    browser = Chrome()
+
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--no-sandbox')
+
+    browser = Chrome(chrome_options = options)
     html = extract_html()
     new_list = extract_data(html,new_list)
     old_list = read_csv(old_list)
