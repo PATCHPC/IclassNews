@@ -36,6 +36,5 @@ if __name__ == '__main__':
     userid = '2018211197'
     passwd = '065527'
 
-    browser = 
 
 
