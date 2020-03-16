@@ -54,7 +54,7 @@ def extract_data(html, new_list):
     return new_list
 
 def read_csv(old_list):
-    csv_reader = csv.reader(open('msg.csv', "rt",encoding="utf-8"))
+    csv_reader = csv.reader(open('/home/icassnews/msg.csv', "rt",encoding="utf-8"))
     for row in csv_reader:
         old_list.append(row)
     return old_list
@@ -75,7 +75,7 @@ def compare_data(new_list, old_list, send_list):
 
 
 def update_data(new_list):
-    f = open('msg.csv','r+',newline='',encoding='utf-8')
+    f = open('/home/icassnews/msg.csv','r+',newline='',encoding='utf-8')
     f_csv = csv.writer(f)
     f_csv.writerow(new_list[0])
     
@@ -92,7 +92,7 @@ def send_email(send_list):
         msg['To'] = Header(to_addr)
         msg['Subject'] = Header('爱课堂有新作业啦'+",来自"+item[2])
         # 开启发信服务，这里使用的是加密传输
-        server = smtplib.SMTP_SSL()
+        server = smtplib.SMTP_SSL(host = 'smtp.qq.com')
         server.connect(smtp_server,465)
         # 登录发信邮箱
         server.login(from_addr, password)
@@ -104,7 +104,7 @@ def send_email(send_list):
 if __name__ == '__main__':
     from_addr = '1132680329@qq.com'
     password = 'jncqbojqjdcujcbc'
-    to_addr = 'singledogepc@foxmail.com'
+    to_addr = '1132680329@qq.com'
     smtp_server = 'smtp.qq.com'
     # 邮件相关
 
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
 
-    browser = Chrome(chrome_options = options)
+    browser = Chrome(options = options)
     html = extract_html()
     new_list = extract_data(html,new_list)
     old_list = read_csv(old_list)
@@ -130,6 +130,7 @@ if __name__ == '__main__':
     update_data(new_list)
     send_email(send_list)
 
+    print('done')
     browser.close()
 
     
