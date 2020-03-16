@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.keys import Keys
-import time,re,csv
+import time,re,csv,os
 from bs4 import BeautifulSoup
 # 数据抓取相关的库
 
@@ -54,7 +54,11 @@ def extract_data(html, new_list):
     return new_list
 
 def read_csv(old_list):
-    csv_reader = csv.reader(open('/home/icassnews/msg.csv', "rt",encoding="utf-8"))
+    try:
+        csv_reader = csv.reader(open('/home/icassnews/msg.csv', "rt",encoding="utf-8"))
+    except(FileNotFoundError):
+        csv_reader = csv.reader(open('msg.csv', "rt",encoding="utf-8"))
+
     for row in csv_reader:
         old_list.append(row)
     return old_list
@@ -75,31 +79,40 @@ def compare_data(new_list, old_list, send_list):
 
 
 def update_data(new_list):
-    f = open('/home/icassnews/msg.csv','r+',newline='',encoding='utf-8')
-    f_csv = csv.writer(f)
-    f_csv.writerow(new_list[0])
+    try:
+        try:
+            f = open('/home/icassnews/msg.csv','r+',newline='',encoding='utf-8')
+        except(FileNotFoundError):
+            f = open('msg.csv','r+',newline='',encoding='utf-8')
+        
+        f_csv = csv.writer(f)
+        f_csv.writerow(new_list[0])
+    except:
+        print("update_data failed")
     
 
 
 def send_email(send_list):
     
-
-    for item in send_list:
-        # 邮箱正文内容，第一个参数为内容，第二个参数为格式(plain 为纯文本)，第三个参数为编码
-        msg = MIMEText(item[1]+"来自"+item[2],'plain','utf-8')
-        # 邮件头信息
-        msg['From'] = Header(from_addr)
-        msg['To'] = Header(to_addr)
-        msg['Subject'] = Header('爱课堂有新作业啦'+",来自"+item[2])
-        # 开启发信服务，这里使用的是加密传输
-        server = smtplib.SMTP_SSL(host = 'smtp.qq.com')
-        server.connect(smtp_server,465)
-        # 登录发信邮箱
-        server.login(from_addr, password)
-        # 发送邮件
-        server.sendmail(from_addr, to_addr, msg.as_string())
-        # 关闭服务器
-        server.quit()
+    try:
+        for item in send_list:
+            # 邮箱正文内容，第一个参数为内容，第二个参数为格式(plain 为纯文本)，第三个参数为编码
+            msg = MIMEText(item[1]+"来自"+item[2],'plain','utf-8')
+            # 邮件头信息
+            msg['From'] = Header(from_addr)
+            msg['To'] = Header(to_addr)
+            msg['Subject'] = Header('爱课堂有新作业啦'+",来自"+item[2])
+            # 开启发信服务，这里使用的是加密传输
+            server = smtplib.SMTP_SSL(host = 'smtp.qq.com')
+            server.connect(smtp_server,465)
+            # 登录发信邮箱
+            server.login(from_addr, password)
+            # 发送邮件
+            server.sendmail(from_addr, to_addr, msg.as_string())
+            # 关闭服务器
+            server.quit()
+    except:
+        print('send_email failed')
 
 if __name__ == '__main__':
     from_addr = '1132680329@qq.com'
@@ -120,18 +133,26 @@ if __name__ == '__main__':
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
-
-    browser = Chrome(options = options)
-    html = extract_html()
-    new_list = extract_data(html,new_list)
-    old_list = read_csv(old_list)
-    send_list = compare_data(new_list, old_list, send_list)
     
-    update_data(new_list)
-    send_email(send_list)
-
-    print('done')
-    browser.close()
+    try:
+        browser = Chrome(options = options)
+        html = extract_html()
+        new_list = extract_data(html,new_list)
+        old_list = read_csv(old_list)
+        send_list = compare_data(new_list, old_list, send_list)
+        
+        update_data(new_list)
+        send_email(send_list)
+        print('扫描已完成')
+        browser.quit()
+        # os.system('taskkill /im chromedriver.exe /F')
+        # os.system('taskkill /im chrome.exe /F')
+    except:        
+        os.system('taskkill /im chromedriver.exe /F')
+        os.system('taskkill /im chrome.exe /F')
+        print('出现错误，进程已杀')
+    
+    browser.quit()
 
     
 
