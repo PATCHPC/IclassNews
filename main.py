@@ -11,6 +11,9 @@ from email.mime.text import MIMEText
 from email.header import Header
 # 用于构建邮件头
 
+import os
+# 2021-4 更新，os用于从系统路径中获取密码以及用户名
+
 def extract_html():
     browser.get(url)
     time.sleep(2)
@@ -122,8 +125,8 @@ if __name__ == '__main__':
     # 邮件相关
 
     url = "https://iclass.bupt.edu.cn/webapps/portal/execute/tabs/tabAction?tab_tab_group_id=_1_1"
-    userid = '2018211197'
-    passwd = '065527'
+    userid = os.environ['iClass_UserID']
+    passwd = os.environ['iClass_PassWD']
 
     new_list = []
     old_list = []
